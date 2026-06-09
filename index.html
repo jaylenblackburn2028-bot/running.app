@@ -251,6 +251,42 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .saved-workout-meta{font-size:12px;color:var(--text-2)}
 
 /* Modal */
+/* Activity Type Picker */
+#type-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:200;transition:background 0.3s var(--ease)}
+#type-picker-backdrop.visible{background:rgba(0,0,0,0.45);pointer-events:all}
+#type-picker{
+  position:fixed;left:0;right:0;bottom:var(--nav-h);
+  height:auto;max-height:88vh;
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  z-index:201;
+  display:flex;flex-direction:column;
+  transform:translateY(110%);
+  transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);
+  box-shadow:0 -12px 60px rgba(0,0,0,0.18);
+  overflow:hidden;
+}
+#type-picker.open{transform:translateY(0)}
+.type-picker-handle{width:36px;height:4px;border-radius:2px;background:var(--line-2);margin:14px auto 0;flex-shrink:0}
+.type-picker-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.type-picker-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.type-picker-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:4px 16px 24px;overflow-y:auto}
+.type-card{border-radius:18px;padding:22px 18px 20px;display:flex;flex-direction:column;gap:10px;cursor:pointer;border:2px solid transparent;transition:transform 0.18s var(--ease),box-shadow 0.18s,opacity 0.15s;position:relative;overflow:hidden}
+.type-card:hover{transform:translateY(-2px);box-shadow:var(--sh3)}
+.type-card:active{transform:scale(0.97)}
+.type-card-icon{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center}
+.type-card-icon svg{width:24px;height:24px;stroke:rgba(255,255,255,0.9);fill:none;stroke-width:2;stroke-linecap:round}
+.type-card-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.01em}
+.type-card-desc{font-size:11px;color:rgba(255,255,255,0.72);font-weight:500;letter-spacing:0.02em;line-height:1.4}
+.type-card-shine{position:absolute;top:-30%;right:-20%;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.08)}
+
+@media(min-width:768px){
+  #type-picker{left:auto;right:0;top:0;bottom:0;width:440px;height:auto;border-radius:0;border-left:1px solid var(--line);transform:translateX(110%);box-shadow:-8px 0 48px rgba(0,0,0,0.12)}
+  #type-picker.open{transform:translateX(0)}
+  .type-picker-handle{display:none}
+  .type-picker-grid{grid-template-columns:repeat(2,1fr);padding:8px 20px 32px}
+}
+
 #modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:300;transition:background 0.25s}
 #modal-backdrop.visible{background:rgba(0,0,0,0.5);pointer-events:all}
 #modal{position:fixed;bottom:0;left:0;right:0;z-index:301;transform:translateY(100%);transition:transform 0.35s var(--ease);background:var(--surface);border-radius:20px 20px 0 0;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
@@ -427,6 +463,19 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
     </div>
     <div class="panel-body" id="panel-body"></div>
   </aside>
+
+  <!-- Activity Type Picker -->
+  <div id="type-picker-backdrop" onclick="closeTypePicker()"></div>
+  <div id="type-picker">
+    <div class="type-picker-handle"></div>
+    <div class="type-picker-header">
+      <div class="type-picker-title">What did you do?</div>
+      <button class="panel-close" onclick="closeTypePicker()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="type-picker-grid" id="type-picker-grid"></div>
+  </div>
 
   <!-- Modal -->
   <div id="modal-backdrop" onclick="closeModal()"></div>
@@ -820,9 +869,44 @@ function renderEventCard(e, ds) {
 // ─────────────────────────────────────────────
 function startAddActivity(ds) {
   S.form={...S.form, type:null, editId:null, date:ds, raceName:'', distance:'', distUnit:S.settings.units, duration:'', notes:'', workoutMode:'interval', intervalSubtype:'intervals', tempoSubtype:'tempo', blocks:[], segments:[], totalDist:'', totalDistUnit:S.settings.units, totalDur:'', customName:'', customDist:'', customDur:'', customDesc:''};
+  openTypePicker(ds);
+}
+function openTypePicker(ds) {
+  const types=[
+    {t:'easy',   icon:'<path d="M13 16h-1v-4h-1m1-4h.01"/><circle cx="12" cy="12" r="9"/>',    desc:'Recovery & base building'},
+    {t:'long',   icon:'<path d="M3 12h18M3 6l9 6 9-6"/>',                                       desc:'Distance & endurance runs'},
+    {t:'workout',icon:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>',                           desc:'Intervals, tempo & speed'},
+    {t:'race',   icon:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',desc:'Competition & time trials'},
+    {t:'strength',icon:'<path d="M6.5 6.5h11M6.5 17.5h11M3 12h18M7.5 3v3M16.5 3v3M7.5 18v3M16.5 18v3"/>',desc:'Gym & cross-training'},
+    {t:'cross',  icon:'<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M2 12h20"/>',desc:'Bike, swim & more'},
+    {t:'rest',   icon:'<path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>',desc:'Rest & recovery day'},
+  ];
+  const grid=document.getElementById('type-picker-grid');
+  grid.innerHTML=types.map(({t,icon,desc})=>{
+    const color=ACTIVITY_COLORS[t]||'#ccc';
+    const label=ACTIVITY_LABELS[t]||t;
+    return `<div class="type-card" style="background:linear-gradient(135deg,${color},${color}CC)" onclick="pickActivityType('${t}','${ds}')">
+      <div class="type-card-shine"></div>
+      <div class="type-card-icon"><svg viewBox="0 0 24 24">${icon}</svg></div>
+      <div>
+        <div class="type-card-name">${label}</div>
+        <div class="type-card-desc">${desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('type-picker').classList.add('open');
+  document.getElementById('type-picker-backdrop').classList.add('visible');
+}
+function closeTypePicker() {
+  document.getElementById('type-picker').classList.remove('open');
+  document.getElementById('type-picker-backdrop').classList.remove('visible');
+}
+function pickActivityType(type, ds) {
+  closeTypePicker();
+  S.form.type=type;
   S.panelMode='form';
-  setPanelHeader('Log Activity', fmtDateShort(ds));
-  renderActivityTypeSelector(ds);
+  setPanelHeader(ACTIVITY_LABELS[type]||type, fmtDateShort(ds));
+  renderFormForType(type, ds);
   openPanel();
 }
 function editActivity(ds, id) {
@@ -868,7 +952,7 @@ function renderFormForType(type, ds) {
   }
   html+=`<div class="form-group"><label>Notes</label><textarea id="f-notes" placeholder="Notes..." oninput="S.form.notes=this.value">${S.form.notes}</textarea></div>`;
   html+=`<button class="add-btn-solid" onclick="saveActivity()">${S.form.editId?'Save Changes':'Log Activity'}</button>`;
-  if(S.form.editId) html+=`<button class="add-btn" style="margin-top:8px" onclick="startAddActivity('${S.form.date}')">← Back</button>`;
+  if(!S.form.editId) html+=`<button class="add-btn" style="margin-top:8px" onclick="closePanel();openTypePicker('${S.form.date}')">← Change Type</button>`;
   html+=`</div>`;
   document.getElementById('panel-body').innerHTML=html;
 }
