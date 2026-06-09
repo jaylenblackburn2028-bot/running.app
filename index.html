@@ -212,6 +212,26 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .stat-card-label{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3)}
 .stat-card.wide{grid-column:span 2}
 .stat-card.wide .stat-card-val{font-size:28px}
+/* Race History */
+.race-filter-strip{display:flex;gap:4px;flex-wrap:wrap}
+.race-filter-btn{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.03em;border:1.5px solid var(--line-2);background:var(--surface-2);color:var(--text-2);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.race-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.pr-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.pr-chip{background:var(--accent-dim);border:1.5px solid rgba(232,98,42,0.2);border-radius:10px;padding:8px 12px;display:flex;flex-direction:column;gap:2px}
+.pr-chip-dist{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent)}
+.pr-chip-time{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--text);letter-spacing:-0.01em}
+.race-list{display:flex;flex-direction:column}
+.race-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.race-row:last-child{border-bottom:none}
+.race-row-future{opacity:0.45}
+.race-row-left{flex:1;min-width:0}
+.race-row-name{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.race-row-meta{font-size:11px;color:var(--text-3);margin-top:2px;font-family:'DM Mono',monospace}
+.race-row-right{text-align:right;flex-shrink:0}
+.race-row-time{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--text);letter-spacing:-0.01em}
+.race-row-pace{font-size:10px;color:var(--text-3);margin-top:2px;font-family:'DM Mono',monospace}
+.pr-badge{background:var(--accent);color:#fff;font-size:8px;font-weight:800;letter-spacing:0.1em;padding:2px 6px;border-radius:4px;text-transform:uppercase;vertical-align:middle}
+
 .empty-dash-overlay{position:absolute;inset:0;background:rgba(var(--surface-rgb,255,255,255),0.85);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;border-radius:var(--r3);z-index:2;padding:20px}
 [data-theme="dark"] .empty-dash-overlay{background:rgba(29,29,27,0.85)}
 .empty-dash-icon{font-size:28px;margin-bottom:4px}
@@ -251,6 +271,43 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .saved-workout-meta{font-size:12px;color:var(--text-2)}
 
 /* Modal */
+/* Activity Form Sheet */
+#form-sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:210;transition:background 0.3s var(--ease)}
+#form-sheet-backdrop.visible{background:rgba(0,0,0,0.45);pointer-events:all}
+#form-sheet{
+  position:fixed;left:0;right:0;bottom:var(--nav-h);
+  max-height:92vh;
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  z-index:211;
+  display:flex;flex-direction:column;
+  transform:translateY(110%);
+  transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);
+  box-shadow:0 -12px 60px rgba(0,0,0,0.18);
+  overflow:hidden;
+}
+#form-sheet.open{transform:translateY(0)}
+.form-sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--line-2);margin:14px auto 0;flex-shrink:0}
+.form-sheet-header{padding:14px 20px 12px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--line)}
+.form-sheet-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.02em}
+.form-sheet-sub{font-size:11px;color:var(--text-3);margin-top:3px;font-family:'DM Mono',monospace;letter-spacing:0.04em;text-transform:uppercase}
+.form-sheet-body{flex:1;overflow-y:auto;padding:16px 20px 32px;display:flex;flex-direction:column;gap:14px}
+.form-sheet-body::-webkit-scrollbar{width:0}
+/* Race distance picker */
+.race-dist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.race-dist-btn{padding:12px 8px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all 0.15s}
+.race-dist-btn:hover{border-color:var(--accent);background:var(--accent-dim2)}
+.race-dist-btn.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.race-dist-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.race-dist-mi{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.03em}
+.race-dist-btn.active .race-dist-mi{color:var(--accent)}
+
+@media(min-width:768px){
+  #form-sheet{left:auto;right:0;top:0;bottom:0;max-height:none;border-radius:0;border-left:1px solid var(--line);width:440px;transform:translateX(110%);box-shadow:-8px 0 48px rgba(0,0,0,0.12)}
+  #form-sheet.open{transform:translateX(0)}
+  .form-sheet-handle{display:none}
+}
+
 /* Activity Type Picker */
 #type-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:200;transition:background 0.3s var(--ease)}
 #type-picker-backdrop.visible{background:rgba(0,0,0,0.45);pointer-events:all}
@@ -463,6 +520,22 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
     </div>
     <div class="panel-body" id="panel-body"></div>
   </aside>
+
+  <!-- Activity Form Sheet -->
+  <div id="form-sheet-backdrop" onclick="closeFormSheet()"></div>
+  <div id="form-sheet">
+    <div class="form-sheet-handle"></div>
+    <div class="form-sheet-header">
+      <div>
+        <div class="form-sheet-title" id="form-sheet-title"></div>
+        <div class="form-sheet-sub" id="form-sheet-sub"></div>
+      </div>
+      <button class="panel-close" onclick="closeFormSheet()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="form-sheet-body" id="form-sheet-body"></div>
+  </div>
 
   <!-- Activity Type Picker -->
   <div id="type-picker-backdrop" onclick="closeTypePicker()"></div>
@@ -868,7 +941,7 @@ function renderEventCard(e, ds) {
 // ACTIVITY FORM
 // ─────────────────────────────────────────────
 function startAddActivity(ds) {
-  S.form={...S.form, type:null, editId:null, date:ds, raceName:'', distance:'', distUnit:S.settings.units, duration:'', notes:'', workoutMode:'interval', intervalSubtype:'intervals', tempoSubtype:'tempo', blocks:[], segments:[], totalDist:'', totalDistUnit:S.settings.units, totalDur:'', customName:'', customDist:'', customDur:'', customDesc:''};
+  S.form={...S.form, type:null, editId:null, date:ds, raceName:'', distance:'', distUnit:S.settings.units, duration:'', notes:'', raceDistKey:'', workoutMode:'interval', intervalSubtype:'intervals', tempoSubtype:'tempo', blocks:[], segments:[], totalDist:'', totalDistUnit:S.settings.units, totalDur:'', customName:'', customDist:'', customDur:'', customDesc:''};
   openTypePicker(ds);
 }
 function openTypePicker(ds) {
@@ -904,20 +977,26 @@ function closeTypePicker() {
 function pickActivityType(type, ds) {
   closeTypePicker();
   S.form.type=type;
-  S.panelMode='form';
-  setPanelHeader(ACTIVITY_LABELS[type]||type, fmtDateShort(ds));
   renderFormForType(type, ds);
-  openPanel();
+  openFormSheet(ACTIVITY_LABELS[type]||type, fmtDateShort(ds));
+}
+function openFormSheet(title, sub) {
+  document.getElementById('form-sheet-title').textContent=title;
+  document.getElementById('form-sheet-sub').textContent=sub||'';
+  document.getElementById('form-sheet').classList.add('open');
+  document.getElementById('form-sheet-backdrop').classList.add('visible');
+}
+function closeFormSheet() {
+  document.getElementById('form-sheet').classList.remove('open');
+  document.getElementById('form-sheet-backdrop').classList.remove('visible');
 }
 function editActivity(ds, id) {
   const acts=S.activities[ds]||[];
   const a=acts.find(x=>x.id===id);
   if(!a) return;
-  S.form={...S.form, type:a.type, editId:id, date:ds, raceName:a.raceName||'', distance:a.distance||'', distUnit:a.distUnit||S.settings.units, duration:a.duration||'', notes:a.notes||'', workoutMode:a.workoutMode||'interval', blocks:a.blocks||[], segments:a.segments||[], totalDist:a.totalDist||'', totalDistUnit:a.totalDistUnit||S.settings.units, totalDur:a.totalDur||'', customName:a.customName||'', customDist:a.customDist||'', customDur:a.customDur||'', customDesc:a.customDesc||''};
-  S.panelMode='form';
-  setPanelHeader('Edit Activity', fmtDateShort(ds));
+  S.form={...S.form, type:a.type, editId:id, date:ds, raceName:a.raceName||'', distance:a.distance||'', distUnit:a.distUnit||S.settings.units, duration:a.duration||'', notes:a.notes||'', raceDistKey:a.raceDistKey||'', workoutMode:a.workoutMode||'interval', blocks:a.blocks||[], segments:a.segments||[], totalDist:a.totalDist||'', totalDistUnit:a.totalDistUnit||S.settings.units, totalDur:a.totalDur||'', customName:a.customName||'', customDist:a.customDist||'', customDur:a.customDur||'', customDesc:a.customDesc||''};
   renderFormForType(a.type, ds);
-  openPanel();
+  openFormSheet('Edit '+(ACTIVITY_LABELS[a.type]||a.type), fmtDateShort(ds));
 }
 function renderActivityTypeSelector(ds) {
   const types=['easy','long','workout','race','strength','cross','rest'];
@@ -931,30 +1010,81 @@ function selectActivityType(type, ds) {
   S.form.type=type;
   renderFormForType(type, ds);
 }
+const RACE_DISTANCES=[
+  {key:'5k',     name:'5K',          mi:3.107,  km:5},
+  {key:'8k',     name:'8K',          mi:4.971,  km:8},
+  {key:'10k',    name:'10K',         mi:6.214,  km:10},
+  {key:'15k',    name:'15K',         mi:9.321,  km:15},
+  {key:'10mi',   name:'10 Mile',     mi:10,     km:16.093},
+  {key:'half',   name:'Half Marathon',mi:13.109,km:21.098},
+  {key:'25k',    name:'25K',         mi:15.534, km:25},
+  {key:'marathon',name:'Marathon',   mi:26.219, km:42.195},
+  {key:'50k',    name:'50K',         mi:31.069, km:50},
+  {key:'50mi',   name:'50 Mile',     mi:50,     km:80.467},
+  {key:'100k',   name:'100K',        mi:62.137, km:100},
+  {key:'100mi',  name:'100 Mile',    mi:100,    km:160.934},
+  {key:'custom', name:'Custom',      mi:null,   km:null},
+];
 function renderFormForType(type, ds) {
   S.panelMode = type==='workout'?'workout':'form';
-  setPanelHeader(ACTIVITY_LABELS[type]||type, fmtDateShort(ds||S.form.date));
-  let html='';
   if(type==='workout') { renderWorkoutBuilder(); return; }
-  html+=`<div class="form-section">`;
-  html+=`<div class="form-group"><label>Date</label><input type="date" id="f-date" value="${ds||S.form.date}" onchange="S.form.date=this.value"></div>`;
-  if(['easy','long','cross','race'].includes(type)) {
-    html+=`<div class="form-group"><label>Distance</label><div class="flex gap-8"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
+  const date=ds||S.form.date;
+  let html='';
+
+  html+=`<div class="form-group"><label>Date</label><input type="date" id="f-date" value="${date}" onchange="S.form.date=this.value"></div>`;
+
+  if(type==='race') {
+    // Race name
+    html+=`<div class="form-group"><label>Race Name</label><input type="text" id="f-race-name" placeholder="e.g. Boston Marathon" value="${S.form.raceName}" oninput="S.form.raceName=this.value"></div>`;
+    // Distance selector grid
+    const unit=S.settings.units==='km'?'km':'mi';
+    html+=`<div class="form-group"><label>Distance</label><div class="race-dist-grid">`;
+    html+=RACE_DISTANCES.map(d=>{
+      const active=S.form.raceDistKey===d.key;
+      const sub=d.mi!=null?(unit==='km'?d.km+'km':d.mi+'mi'):'Enter below';
+      return `<div class="race-dist-btn${active?' active':''}" onclick="selectRaceDist('${d.key}')">
+        <div class="race-dist-name">${d.name}</div>
+        <div class="race-dist-mi">${sub}</div>
+      </div>`;
+    }).join('');
+    html+=`</div></div>`;
+    // Custom distance input (only shown when custom selected)
+    if(S.form.raceDistKey==='custom') {
+      html+=`<div class="form-group"><label>Custom Distance</label><div style="display:flex;gap:8px"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
+    }
+    html+=`<div class="form-group"><label>Finish Time <span style="font-weight:400;text-transform:none;letter-spacing:0">(MM:SS or H:MM:SS)</span></label><input type="text" id="f-dur" placeholder="e.g. 1:52:30" value="${S.form.duration}" oninput="S.form.duration=this.value;calcPace()"></div>`;
+    html+=`<div class="pace-display" id="f-pace-display"><span class="pace-display-lbl">Avg Pace</span><span class="pace-display-val" id="f-pace-val">—</span></div>`;
+  } else if(['easy','long','cross'].includes(type)) {
+    html+=`<div class="form-group"><label>Distance</label><div style="display:flex;gap:8px"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
     html+=`<div class="form-group"><label>Duration <span style="font-weight:400;text-transform:none;letter-spacing:0">(MM:SS or H:MM:SS)</span></label><input type="text" id="f-dur" placeholder="e.g. 52:30" value="${S.form.duration}" oninput="S.form.duration=this.value;calcPace()"></div>`;
     html+=`<div class="pace-display" id="f-pace-display"><span class="pace-display-lbl">Pace</span><span class="pace-display-val" id="f-pace-val">—</span></div>`;
-  }
-  if(type==='race') {
-    html=html.replace('<div class="form-section">','<div class="form-section">');
-    html+=`<div class="form-group"><label>Race Name</label><input type="text" id="f-race-name" placeholder="e.g. Boston Marathon" value="${S.form.raceName}" oninput="S.form.raceName=this.value"></div>`;
-  }
-  if(type==='strength') {
+  } else if(type==='strength') {
     html+=`<div class="form-group"><label>Duration (MM:SS)</label><input type="text" id="f-dur" placeholder="e.g. 45:00" value="${S.form.duration}" oninput="S.form.duration=this.value"></div>`;
   }
+
   html+=`<div class="form-group"><label>Notes</label><textarea id="f-notes" placeholder="Notes..." oninput="S.form.notes=this.value">${S.form.notes}</textarea></div>`;
   html+=`<button class="add-btn-solid" onclick="saveActivity()">${S.form.editId?'Save Changes':'Log Activity'}</button>`;
-  if(!S.form.editId) html+=`<button class="add-btn" style="margin-top:8px" onclick="closePanel();openTypePicker('${S.form.date}')">← Change Type</button>`;
-  html+=`</div>`;
-  document.getElementById('panel-body').innerHTML=html;
+  if(!S.form.editId) html+=`<button class="add-btn" style="margin-top:8px" onclick="closeFormSheet();openTypePicker('${date}')">← Change Type</button>`;
+
+  const target=document.getElementById('form-sheet-body')||document.getElementById('panel-body');
+  target.innerHTML=html;
+}
+function selectRaceDist(key) {
+  const d=RACE_DISTANCES.find(r=>r.key===key);
+  S.form.raceDistKey=key;
+  if(d&&d.mi!=null) {
+    const unit=S.settings.units==='km'?'km':'miles';
+    S.form.distance=unit==='km'?String(d.km):String(d.mi);
+    S.form.distUnit=unit==='km'?'km':'miles';
+  } else {
+    S.form.distance='';
+  }
+  renderFormForType('race', S.form.date);
+  // restore duration/raceName after re-render
+  const dur=document.getElementById('f-dur');
+  const rn=document.getElementById('f-race-name');
+  if(dur) dur.value=S.form.duration;
+  if(rn) rn.value=S.form.raceName;
 }
 function setDistUnit(unit) {
   S.form.distUnit=unit;
@@ -965,8 +1095,9 @@ function calcPace() {
   const durEl=document.getElementById('f-dur');
   const valEl=document.getElementById('f-pace-val');
   if(!valEl) return;
-  const dist=parseFloat(distEl?.value)||0;
-  const mins=durationToMins(durEl?.value||'');
+  // Use DOM value if available, else fall back to S.form.distance (preset race distances)
+  const dist=parseFloat(distEl?.value)||parseFloat(S.form.distance)||0;
+  const mins=durationToMins(durEl?.value||S.form.duration||'');
   if(dist>0&&mins>0){
     const paceMin=mins/dist;
     const pm=Math.floor(paceMin);
@@ -982,13 +1113,20 @@ function calcPace() {
 function saveActivity() {
   const ds=document.getElementById('f-date')?document.getElementById('f-date').value:S.form.date;
   if(!ds) return;
+  // For races, get distance from raceDistKey if not custom
+  let dist=document.getElementById('f-dist')?document.getElementById('f-dist').value:S.form.distance;
+  if(S.form.type==='race'&&S.form.raceDistKey&&S.form.raceDistKey!=='custom') {
+    const rd=RACE_DISTANCES.find(r=>r.key===S.form.raceDistKey);
+    if(rd) { dist=S.form.distUnit==='km'?String(rd.km):String(rd.mi); }
+  }
   const a = {
     id: S.form.editId||uid(),
     type: S.form.type,
-    distance: document.getElementById('f-dist')?document.getElementById('f-dist').value:S.form.distance,
+    distance: dist,
     distUnit: S.form.distUnit,
     duration: document.getElementById('f-dur')?document.getElementById('f-dur').value:S.form.duration,
     raceName: document.getElementById('f-race-name')?document.getElementById('f-race-name').value:S.form.raceName,
+    raceDistKey: S.form.raceDistKey||'',
     notes: document.getElementById('f-notes')?document.getElementById('f-notes').value:S.form.notes,
   };
   if(!S.activities[ds]) S.activities[ds]=[];
@@ -1005,6 +1143,7 @@ function saveActivity() {
   S.selectedDate=ds;
   const [y,m]=ds.split('-').map(Number);
   S.calYear=y; S.calMonth=m-1;
+  closeFormSheet();
   renderCalendar();
   openDayPanel(ds);
 }
@@ -1416,11 +1555,112 @@ function renderDashboard() {
       <div class="chart-card-title">Longest Run Trend</div>
       <div class="chart-wrap" style="position:relative"><canvas id="chart-longest"></canvas>${!hasData?emptyOverlay('📊','Log at least 2 weeks of runs to see your longest run trend.'):''}</div>
     </div>
+    ${renderRaceHistoryCard()}
   `;
   setTimeout(()=>initCharts(acts, startStr, endStr), 50);
 }
 function emptyOverlay(icon, msg) {
   return `<div class="empty-dash-overlay"><div class="empty-dash-icon">${icon}</div><div class="empty-dash-text">No data yet</div><div class="empty-dash-sub">${msg}</div></div>`;
+}
+function renderRaceHistoryCard() {
+  const today=todayStr();
+  const unit=S.settings.units==='km'?'km':'mi';
+  // Collect all logged races
+  const races=[];
+  Object.entries(S.activities).forEach(([ds,acts])=>{
+    acts.filter(a=>a.type==='race').forEach(a=>{
+      races.push({ds,a});
+    });
+  });
+  // Collect future race events
+  const futureRaces=[];
+  Object.entries(S.events||{}).forEach(([ds,evts])=>{
+    if(ds>today) evts.filter(e=>e.type==='race').forEach(e=>{ futureRaces.push({ds,e}); });
+  });
+  // PRs: best (fastest) time per raceDistKey
+  const prs={};
+  races.forEach(({ds,a})=>{
+    if(!a.raceDistKey||!a.duration) return;
+    const mins=durationToMins(a.duration);
+    if(!mins) return;
+    if(!prs[a.raceDistKey]||mins<prs[a.raceDistKey].mins) {
+      prs[a.raceDistKey]={mins,ds,a};
+    }
+  });
+  // Filter and sort
+  const activeFilter=S.raceHistFilter||'all';
+  let filtered=races;
+  if(activeFilter!=='all') filtered=races.filter(({a})=>a.raceDistKey===activeFilter);
+  filtered.sort((a,b)=>a.ds>b.ds?-1:1);
+
+  // Distinct distances that have races
+  const distKeys=[...new Set(races.map(({a})=>a.raceDistKey).filter(Boolean))];
+  const filterBtns=['all',...distKeys].map(k=>{
+    const lbl=k==='all'?'All':(RACE_DISTANCES.find(r=>r.key===k)?.name||k);
+    return `<button class="race-filter-btn${activeFilter===k?' active':''}" onclick="setRaceHistFilter('${k}')">${lbl}</button>`;
+  }).join('');
+
+  const raceRows=filtered.map(({ds,a})=>{
+    const rd=RACE_DISTANCES.find(r=>r.key===a.raceDistKey);
+    const distLabel=rd?rd.name:(a.distance?`${parseFloat(a.distance).toFixed(1)} ${unit}`:'—');
+    const mins=durationToMins(a.duration||'');
+    const isPR=a.raceDistKey&&prs[a.raceDistKey]&&prs[a.raceDistKey].a.id===a.id&&mins>0;
+    const pace=()=>{
+      const d=parseFloat(a.distance)||0;
+      if(!d||!mins) return '—';
+      const pm=Math.floor(mins/d),ps=Math.round(((mins/d)-pm)*60);
+      return `${pm}:${String(ps).padStart(2,'0')}/${unit}`;
+    };
+    return `<div class="race-row">
+      <div class="race-row-left">
+        <div class="race-row-name">${a.raceName||distLabel}${isPR?'<span class="pr-badge">PR</span>':''}</div>
+        <div class="race-row-meta">${fmtDate(ds)} · ${distLabel}</div>
+      </div>
+      <div class="race-row-right">
+        <div class="race-row-time">${a.duration||'—'}</div>
+        <div class="race-row-pace">${pace()}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const futureRows=futureRaces.sort((a,b)=>a.ds<b.ds?-1:1).map(({ds,e})=>{
+    const daysUntil=Math.round((parseDate(ds)-new Date())/86400000);
+    return `<div class="race-row race-row-future">
+      <div class="race-row-left">
+        <div class="race-row-name">${e.name}</div>
+        <div class="race-row-meta">${fmtDate(ds)} · ${daysUntil}d away</div>
+      </div>
+      <div class="race-row-right">
+        <div class="race-row-time" style="color:var(--text-3)">Upcoming</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(!races.length&&!futureRaces.length) {
+    return `<div class="chart-card">
+      <div class="chart-card-title">Race History</div>
+      <div class="empty-day" style="padding:24px 0">
+        <div class="empty-day-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
+        Log a race to start tracking your PRs.
+      </div>
+    </div>`;
+  }
+
+  return `<div class="chart-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="chart-card-title" style="margin-bottom:0">Race History</div>
+      <div class="race-filter-strip">${filterBtns}</div>
+    </div>
+    ${Object.keys(prs).length?`<div class="pr-strip">${Object.entries(prs).map(([k,{a,mins}])=>{
+      const rd=RACE_DISTANCES.find(r=>r.key===k);
+      return `<div class="pr-chip"><div class="pr-chip-dist">${rd?.name||k}</div><div class="pr-chip-time">${a.duration}</div></div>`;
+    }).join('')}</div>`:''}
+    <div class="race-list">${futureRows}${raceRows||'<div style="color:var(--text-3);font-size:13px;padding:12px 0">No races match this filter.</div>'}</div>
+  </div>`;
+}
+function setRaceHistFilter(k) {
+  S.raceHistFilter=k;
+  renderDashboard();
 }
 function fmtTime(mins) {
   const h=Math.floor(mins/60),m=Math.round(mins%60);
