@@ -270,6 +270,42 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .history-type{font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px}
 .history-stats{font-size:13px;color:var(--text-2)}
 
+/* Weekly goal strip */
+#week-goal-strip{margin-bottom:14px;background:var(--surface);border-radius:var(--r2);padding:12px 14px;border:1.5px solid var(--line);display:none}
+#week-goal-strip.visible{display:block}
+.wg-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.wg-label{font-size:12px;font-weight:600;color:var(--text-2);letter-spacing:0.03em}
+.wg-nums{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text)}
+.wg-nums span{color:var(--text-3)}
+.wg-bar-track{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.wg-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),#f5a623);transition:width 0.6s cubic-bezier(0.22,1,0.36,1)}
+.wg-streak{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:var(--text-2)}
+.wg-streak-fire{font-size:14px}
+
+/* Calendar — 8-column grid with week total */
+.cal-weekdays{grid-template-columns:repeat(7,1fr) 36px !important}
+.cal-grid{grid-template-columns:repeat(7,1fr) 36px !important}
+.cal-week-lbl{font-size:0}/* blank weekday header for totals col */
+.cal-week-total{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px;cursor:default;opacity:0.6}
+.cal-week-total-num{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;color:var(--text-2);line-height:1;white-space:nowrap}
+.cal-week-total-unit{font-size:8px;color:var(--text-3);line-height:1;margin-top:1px}
+
+/* Effort picker */
+.effort-row{display:flex;gap:6px}
+.effort-btn{flex:1;padding:8px 4px;border-radius:var(--r);border:1.5px solid var(--line-2);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;font-weight:700;color:var(--text-3);cursor:pointer;transition:all 0.15s;background:var(--surface-2);line-height:1;letter-spacing:0.04em;text-transform:uppercase}
+.effort-btn .eff-icon{font-size:16px;line-height:1.2}
+.effort-btn:hover{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.effort-btn.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.effort-dot-sm{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+
+/* Pace display */
+.pace-display{font-family:'DM Mono',monospace;font-size:13px;color:var(--text-2);margin-top:6px;padding:8px 12px;background:var(--surface-2);border-radius:var(--r);border:1px solid var(--line);display:flex;align-items:center;gap:8px;min-height:36px}
+.pace-display-val{font-size:16px;font-weight:500;color:var(--text)}
+.pace-display-lbl{font-size:11px;color:var(--text-3)}
+
+/* Effort chip on activity cards */
+.effort-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:6px}
+
 /* Scrollbar global */
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -349,6 +385,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
       </div>
       <button id="today-btn" onclick="goToToday()">Today</button>
     </div>
+    <div id="week-goal-strip"></div>
     <div id="cal-zoom-wrap">
       <div class="cal-weekdays" id="cal-weekdays"></div>
       <div class="cal-grid" id="cal-grid"></div>
@@ -449,7 +486,7 @@ let S = {
   form: {
     type: null, editId: null, date: null,
     raceName:'', distance:'', distUnit:'miles', duration:'',
-    notes:'', workoutMode:'interval', intervalSubtype:'intervals',
+    notes:'', effort:0, workoutMode:'interval', intervalSubtype:'intervals',
     tempoSubtype:'tempo', blocks:[], segments:[],
     totalDist:'', totalDistUnit:'miles', totalDur:'',
     customName:'', customDist:'', customDur:'', customDesc:'',
@@ -543,10 +580,11 @@ function getActivityDist(a) {
   return d;
 }
 function durationToMins(dur) {
+  // Accepts MM:SS (52:30 = 52.5 min) or H:MM:SS (1:02:30 = 62.5 min)
   if(!dur) return 0;
   const parts=dur.split(':').map(Number);
-  if(parts.length===2) return parts[0]*60+parts[1];
-  if(parts.length===3) return parts[0]*60+parts[1]+parts[2]/60;
+  if(parts.length===2) return parts[0]+parts[1]/60; // MM:SS
+  if(parts.length===3) return parts[0]*60+parts[1]+parts[2]/60; // H:MM:SS
   return 0;
 }
 
@@ -570,10 +608,54 @@ function navigateTo(view) {
 // ─────────────────────────────────────────────
 // CALENDAR
 // ─────────────────────────────────────────────
+function getWeekMileage(startDate) {
+  let total=0;
+  for(let i=0;i<7;i++){
+    const d=addDays(startDate,i);
+    const ds=getWeekStr(d);
+    (S.activities[ds]||[]).forEach(a=>{ total+=getActivityDist(a); });
+  }
+  return total;
+}
+function getCurrentStreak() {
+  let streak=0;
+  const today=new Date();
+  for(let i=0;i<365;i++){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const ds=getWeekStr(d);
+    const acts=S.activities[ds]||[];
+    const hasRun=acts.some(a=>a.type!=='rest');
+    if(hasRun) streak++;
+    else break;
+  }
+  return streak;
+}
+function renderWeekGoalStrip() {
+  const strip=document.getElementById('week-goal-strip');
+  const goal=parseFloat(S.settings.weeklyGoal)||0;
+  const today=new Date();
+  const ws=new Date(today); ws.setDate(today.getDate()-today.getDay());
+  const miles=getWeekMileage(ws);
+  const unit=S.settings.units==='km'?'km':'mi';
+  const streak=getCurrentStreak();
+  if(!goal){ strip.classList.remove('visible'); return; }
+  strip.classList.add('visible');
+  const pct=Math.min(100,(miles/goal)*100).toFixed(0);
+  const done=miles>=goal;
+  strip.innerHTML=`
+    <div class="wg-row">
+      <span class="wg-label">${done?'✅ Weekly Goal Met':'This Week'}</span>
+      <span class="wg-nums">${miles.toFixed(1)} <span>/ ${goal} ${unit}</span></span>
+    </div>
+    <div class="wg-bar-track"><div class="wg-bar-fill" style="width:${pct}%;${done?'background:var(--c-easy)':''}"></div></div>
+    ${streak>1?`<div class="wg-streak"><span class="wg-streak-fire">🔥</span><span>${streak}-day streak</span></div>`:''}
+  `;
+}
 function renderCalendar(direction) {
   document.getElementById('cal-month-label').textContent = `${MONTHS[S.calMonth]} ${S.calYear}`;
+  renderWeekGoalStrip();
   const weekdays = document.getElementById('cal-weekdays');
-  weekdays.innerHTML = DAYS.map(d=>`<div class="cal-weekday">${d}</div>`).join('');
+  weekdays.innerHTML = DAYS.map(d=>`<div class="cal-weekday">${d}</div>`).join('')+'<div class="cal-week-lbl"></div>';
   const grid = document.getElementById('cal-grid');
   const firstDay = new Date(S.calYear, S.calMonth, 1).getDay();
   const daysInMonth = new Date(S.calYear, S.calMonth+1, 0).getDate();
@@ -582,11 +664,19 @@ function renderCalendar(direction) {
   let cells = '';
   let totalCells = firstDay + daysInMonth;
   while(totalCells % 7 !== 0) totalCells++;
+  // Collect all dates per row for week totals
+  const allDates=[];
+  for(let i=0;i<totalCells;i++){
+    let ds;
+    if(i<firstDay){const pd=new Date(S.calYear,S.calMonth-1,prevDays-firstDay+i+1);ds=dateStr(pd.getFullYear(),pd.getMonth(),pd.getDate());}
+    else if(i>=firstDay+daysInMonth){const nd=new Date(S.calYear,S.calMonth+1,i-firstDay-daysInMonth+1);ds=dateStr(nd.getFullYear(),nd.getMonth(),nd.getDate());}
+    else{ds=dateStr(S.calYear,S.calMonth,i-firstDay+1);}
+    allDates.push(ds);
+  }
   for(let i=0; i<totalCells; i++) {
-    let day, isOther=false, ds;
-    if(i<firstDay) { day=prevDays-firstDay+i+1; isOther=true; const pd=new Date(S.calYear,S.calMonth-1,day); ds=dateStr(pd.getFullYear(),pd.getMonth(),pd.getDate()); }
-    else if(i>=firstDay+daysInMonth) { day=i-firstDay-daysInMonth+1; isOther=true; const nd=new Date(S.calYear,S.calMonth+1,day); ds=dateStr(nd.getFullYear(),nd.getMonth(),nd.getDate()); }
-    else { day=i-firstDay+1; ds=dateStr(S.calYear,S.calMonth,day); }
+    const ds=allDates[i];
+    const isOther=(i<firstDay)||(i>=firstDay+daysInMonth);
+    const day=parseDate(ds).getDate();
     const isToday=ds===today;
     const isSelected=ds===S.selectedDate;
     const acts=S.activities[ds]||[];
@@ -601,6 +691,17 @@ function renderCalendar(direction) {
       ${dots?`<div class="day-event-dots">${dots}</div>`:''}
       <div class="day-bars">${bars}</div>
     </div>`;
+    // After every 7 cells (end of week row), add week total
+    if((i+1)%7===0){
+      const rowStart=i-6;
+      const rowDates=allDates.slice(rowStart,i+1);
+      let rowMiles=0;
+      rowDates.forEach(d=>{(S.activities[d]||[]).forEach(a=>{rowMiles+=getActivityDist(a);});});
+      const unit=S.settings.units==='km'?'km':'mi';
+      cells+=rowMiles>0
+        ?`<div class="cal-week-total"><div class="cal-week-total-num">${rowMiles<10?rowMiles.toFixed(1):Math.round(rowMiles)}</div><div class="cal-week-total-unit">${unit}</div></div>`
+        :`<div class="cal-week-total"></div>`;
+    }
   }
   if(direction) {
     grid.className='cal-grid '+direction;
@@ -726,9 +827,17 @@ function renderActivityCard(a, ds) {
   const color=ACTIVITY_COLORS[a.type]||'#ccc';
   const label=ACTIVITY_LABELS[a.type]||a.type;
   const icon=ACTIVITY_ICONS[a.type]||'🏃';
+  const effortIcons=['','😴','😐','😊','💪','🔥'];
+  const effortColors=['','#90A4AE','#4CAF7D','#F5A623','#E8622A','#E53935'];
   let stats='';
   if(a.distance) stats+=`<span class="stat-pill"><strong>${parseFloat(a.distance).toFixed(1)}</strong> ${a.distUnit||S.settings.units}</span>`;
-  if(a.duration) stats+=`<span class="stat-pill"><strong>${a.duration}</strong></span>`;
+  if(a.duration) {
+    stats+=`<span class="stat-pill"><strong>${a.duration}</strong></span>`;
+    // Auto-compute pace if both distance + duration present
+    const dist=parseFloat(a.distance)||0;
+    const mins=durationToMins(a.duration);
+    if(dist>0&&mins>0){const pm=Math.floor(mins/dist);const ps=Math.round(((mins/dist)-pm)*60);stats+=`<span class="stat-pill" style="color:var(--accent)"><strong>${pm}:${String(ps).padStart(2,'0')}</strong>/${a.distUnit==='km'?'km':'mi'}</span>`;}
+  }
   if(a.raceName) stats+=`<span class="stat-pill"><strong>${a.raceName}</strong></span>`;
   return `<div class="activity-card">
     <div class="activity-card-accent" style="background:${color}"></div>
@@ -745,8 +854,8 @@ function renderActivityCard(a, ds) {
         </div>
       </div>
       ${stats?`<div class="activity-stats">${stats}</div>`:''}
-      ${a.notes?`<div class="activity-notes">"${a.notes}"</div>`:''}
-      ${a.workoutMode?`<div class="text-xs color-2" style="margin-top:4px">${a.workoutMode==='custom'?'Custom':'Builder'} workout</div>`:''}
+      ${a.effort?`<div style="margin-top:6px"><span class="effort-chip" style="background:${effortColors[a.effort]}22;color:${effortColors[a.effort]}">${effortIcons[a.effort]} Effort ${a.effort}/5</span></div>`:''}
+      ${a.notes?`<div class="activity-notes" style="margin-top:6px">"${a.notes}"</div>`:''}
     </div>
   </div>`;
 }
@@ -768,7 +877,7 @@ function renderEventCard(e, ds) {
 // ACTIVITY FORM
 // ─────────────────────────────────────────────
 function startAddActivity(ds) {
-  S.form={...S.form, type:null, editId:null, date:ds, raceName:'', distance:'', distUnit:S.settings.units, duration:'', notes:'', workoutMode:'interval', intervalSubtype:'intervals', tempoSubtype:'tempo', blocks:[], segments:[], totalDist:'', totalDistUnit:S.settings.units, totalDur:'', customName:'', customDist:'', customDur:'', customDesc:''};
+  S.form={...S.form, type:null, editId:null, date:ds, raceName:'', distance:'', distUnit:S.settings.units, duration:'', notes:'', effort:0, workoutMode:'interval', intervalSubtype:'intervals', tempoSubtype:'tempo', blocks:[], segments:[], totalDist:'', totalDistUnit:S.settings.units, totalDur:'', customName:'', customDist:'', customDur:'', customDesc:''};
   S.panelMode='form';
   setPanelHeader('Log Activity', fmtDateShort(ds));
   renderActivityTypeSelector(ds);
@@ -804,15 +913,22 @@ function renderFormForType(type, ds) {
   html+=`<div class="form-section">`;
   html+=`<div class="form-group"><label>Date</label><input type="date" id="f-date" value="${ds||S.form.date}" onchange="S.form.date=this.value"></div>`;
   if(['easy','long','cross','race'].includes(type)) {
-    html+=`<div class="form-group"><label>Distance</label><div class="flex gap-8"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
-    html+=`<div class="form-group"><label>Duration (HH:MM)</label><input type="text" id="f-dur" placeholder="00:00" value="${S.form.duration}" oninput="S.form.duration=this.value" pattern="[0-9]{1,2}:[0-9]{2}"></div>`;
+    html+=`<div class="form-group"><label>Distance</label><div class="flex gap-8"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
+    html+=`<div class="form-group"><label>Duration <span style="font-weight:400;text-transform:none;letter-spacing:0">(MM:SS or H:MM:SS)</span></label><input type="text" id="f-dur" placeholder="e.g. 52:30" value="${S.form.duration}" oninput="S.form.duration=this.value;calcPace()"></div>`;
+    html+=`<div class="pace-display" id="f-pace-display"><span class="pace-display-lbl">Pace</span><span class="pace-display-val" id="f-pace-val">—</span></div>`;
   }
   if(type==='race') {
     html=html.replace('<div class="form-section">','<div class="form-section">');
     html+=`<div class="form-group"><label>Race Name</label><input type="text" id="f-race-name" placeholder="e.g. Boston Marathon" value="${S.form.raceName}" oninput="S.form.raceName=this.value"></div>`;
   }
   if(type==='strength') {
-    html+=`<div class="form-group"><label>Duration (HH:MM)</label><input type="text" id="f-dur" placeholder="00:00" value="${S.form.duration}" oninput="S.form.duration=this.value"></div>`;
+    html+=`<div class="form-group"><label>Duration (MM:SS)</label><input type="text" id="f-dur" placeholder="e.g. 45:00" value="${S.form.duration}" oninput="S.form.duration=this.value"></div>`;
+  }
+  // Effort rating (for all run types)
+  if(['easy','long','workout','race','cross'].includes(type)) {
+    const effortLabels=[['😴','Easy'],['😐','Mod'],['😊','Hard'],['💪','V.Hard'],['🔥','Max']];
+    const effortBtns=effortLabels.map(([icon,lbl],idx)=>`<button type="button" class="effort-btn${S.form.effort===idx+1?' active':''}" onclick="S.form.effort=${idx+1};document.querySelectorAll('.effort-btn').forEach((b,i)=>{b.classList.toggle('active',i===${idx})})"><span class="eff-icon">${icon}</span>${lbl}</button>`).join('');
+    html+=`<div class="form-group"><label>Effort</label><div class="effort-row">${effortBtns}</div></div>`;
   }
   html+=`<div class="form-group"><label>Notes</label><textarea id="f-notes" placeholder="How did it feel?" oninput="S.form.notes=this.value">${S.form.notes}</textarea></div>`;
   html+=`<button class="add-btn-solid" onclick="saveActivity()">${S.form.editId?'Save Changes':'Log Activity'}</button>`;
@@ -823,6 +939,25 @@ function renderFormForType(type, ds) {
 function setDistUnit(unit) {
   S.form.distUnit=unit;
   renderFormForType(S.form.type, S.form.date);
+}
+function calcPace() {
+  const distEl=document.getElementById('f-dist');
+  const durEl=document.getElementById('f-dur');
+  const valEl=document.getElementById('f-pace-val');
+  if(!valEl) return;
+  const dist=parseFloat(distEl?.value)||0;
+  const mins=durationToMins(durEl?.value||'');
+  if(dist>0&&mins>0){
+    const paceMin=mins/dist;
+    const pm=Math.floor(paceMin);
+    const ps=Math.round((paceMin-pm)*60);
+    const unit=S.form.distUnit==='km'?'km':'mi';
+    valEl.textContent=`${pm}:${String(ps).padStart(2,'0')} /${unit}`;
+    valEl.style.color='var(--text)';
+  } else {
+    valEl.textContent='—';
+    valEl.style.color='var(--text-3)';
+  }
 }
 function saveActivity() {
   const ds=document.getElementById('f-date')?document.getElementById('f-date').value:S.form.date;
@@ -835,6 +970,7 @@ function saveActivity() {
     duration: document.getElementById('f-dur')?document.getElementById('f-dur').value:S.form.duration,
     raceName: document.getElementById('f-race-name')?document.getElementById('f-race-name').value:S.form.raceName,
     notes: document.getElementById('f-notes')?document.getElementById('f-notes').value:S.form.notes,
+    effort: S.form.effort||0,
   };
   if(!S.activities[ds]) S.activities[ds]=[];
   if(S.form.editId) {
