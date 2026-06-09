@@ -293,14 +293,18 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 #form-sheet-backdrop.visible{background:rgba(0,0,0,0.45);pointer-events:all}
 /* z-index only — layout comes from .modal-shell */
 #form-sheet{z-index:211}
-/* Time input — simple HRS + MIN boxes */
-.time-inputs{display:flex;align-items:flex-end;gap:10px}
+/* Time input — HRS : MIN row, matches distance field height */
+.time-inputs{display:flex;align-items:center;gap:0}
 .time-input-col{display:flex;flex-direction:column;gap:6px;flex:1}
-.time-input-col label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3)}
-.time-input-col input[type=number]{font-family:'DM Mono',monospace;font-size:32px;font-weight:600;letter-spacing:-0.02em;color:var(--text);background:var(--surface-2);border:1.5px solid var(--line-2);border-radius:14px;padding:14px 12px;text-align:center;width:100%;appearance:textfield;-moz-appearance:textfield}
+.time-input-col input[type=number]{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--text);background:var(--surface-2);border:1.5px solid var(--line-2);border-radius:var(--r);padding:10px 14px;text-align:center;width:100%;appearance:textfield;-moz-appearance:textfield;transition:border-color 0.2s,background 0.2s,box-shadow 0.2s}
 .time-input-col input[type=number]::-webkit-inner-spin-button,.time-input-col input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
-.time-input-col input[type=number]:focus{outline:none;border-color:var(--accent);background:var(--surface)}
-.time-input-sep{font-family:'DM Mono',monospace;font-size:32px;font-weight:300;color:var(--text-3);padding-bottom:18px;flex-shrink:0;user-select:none}
+.time-input-col input[type=number]:focus{outline:none;border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px var(--accent-dim)}
+.time-input-sep{font-family:'DM Mono',monospace;font-size:16px;font-weight:400;color:var(--text-3);padding:0 4px;flex-shrink:0;user-select:none}
+/* Pace input — editable, same style as other fields */
+.pace-row{display:flex;align-items:center;gap:10px}
+.pace-input-wrap{flex:1;position:relative}
+.pace-input-wrap input{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;padding-right:52px}
+.pace-unit-badge{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);pointer-events:none}
 /* Race distance picker */
 .race-dist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .race-dist-btn{padding:12px 8px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all 0.15s}
@@ -368,11 +372,8 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .wg-streak{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:var(--text-2)}
 .wg-streak-fire{font-size:14px}
 
-/* Pace display */
-.pace-display{font-family:'DM Mono',monospace;font-size:13px;color:var(--text-2);padding:10px 14px;background:var(--surface-2);border-radius:var(--r);border:1.5px solid var(--line-2);display:flex;align-items:center;gap:10px;min-height:44px;transition:border-color 0.2s,background 0.2s}
-.pace-display.has-pace{background:var(--accent-dim2);border-color:rgba(232,98,42,0.25)}
-.pace-display-val{font-size:18px;font-weight:500;color:var(--accent);letter-spacing:-0.02em}
-.pace-display-lbl{font-size:10px;color:var(--text-3);font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+/* Pace field */
+.pace-field-lbl{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:2px}
 
 
 /* Scrollbar global */
@@ -683,10 +684,10 @@ function getActivityDist(a) {
   return d;
 }
 function durationToMins(dur) {
-  // Accepts MM:SS (52:30 = 52.5 min) or H:MM:SS (1:02:30 = 62.5 min)
+  // Accepts H:MM (1:30 = 90 min) or H:MM:SS (1:02:30 = 62.5 min)
   if(!dur) return 0;
   const parts=dur.split(':').map(Number);
-  if(parts.length===2) return parts[0]+parts[1]/60; // MM:SS
+  if(parts.length===2) return parts[0]*60+parts[1]; // H:MM
   if(parts.length===3) return parts[0]*60+parts[1]+parts[2]/60; // H:MM:SS
   return 0;
 }
@@ -923,7 +924,7 @@ function renderEventCard(e, ds) {
 // ACTIVITY FORM
 // ─────────────────────────────────────────────
 function startAddActivity(ds) {
-  S.form={...S.form, type:null, editId:null, date:ds, raceName:'', distance:'', distUnit:S.settings.units, duration:'', notes:'', raceDistKey:'', workoutMode:'interval', intervalSubtype:'intervals', tempoSubtype:'tempo', blocks:[], segments:[], totalDist:'', totalDistUnit:S.settings.units, totalDur:'', customName:'', customDist:'', customDur:'', customDesc:''};
+  S.form={...S.form, type:null, editId:null, date:ds, raceName:'', distance:'', distUnit:S.settings.units, duration:'', pace:'', notes:'', raceDistKey:'', workoutMode:'interval', intervalSubtype:'intervals', tempoSubtype:'tempo', blocks:[], segments:[], totalDist:'', totalDistUnit:S.settings.units, totalDur:'', customName:'', customDist:'', customDur:'', customDesc:''};
   openTypePicker(ds);
 }
 function openTypePicker(ds) {
@@ -1037,11 +1038,11 @@ function renderFormForType(type, ds) {
       html+=`<div class="form-group"><label>Custom Distance</label><div style="display:flex;gap:8px"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
     }
     html+=`<div class="form-group"><label>Finish Time</label>${buildTimeInputHTML('race')}</div>`;
-    html+=`<div class="pace-display" id="f-pace-display"><span class="pace-display-lbl">Avg Pace</span><span class="pace-display-val" id="f-pace-val">—</span></div>`;
+    html+=buildPaceFieldHTML('Avg Pace /'+( S.form.distUnit==='km'?'km':'mi'));
   } else if(['easy','long','cross'].includes(type)) {
-    html+=`<div class="form-group"><label>Distance</label><div style="display:flex;gap:8px"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
+    html+=`<div class="form-group"><label>Distance</label><div style="display:flex;gap:8px"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcFaultTolerant('dist')" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
     html+=`<div class="form-group"><label>Duration</label>${buildTimeInputHTML('simple')}</div>`;
-    html+=`<div class="pace-display" id="f-pace-display"><span class="pace-display-lbl">Pace</span><span class="pace-display-val" id="f-pace-val">—</span></div>`;
+    html+=buildPaceFieldHTML('/'+( S.form.distUnit==='km'?'km':'mi'));
   } else if(type==='strength') {
     html+=`<div class="form-group"><label>Duration</label>${buildTimeInputHTML('simple')}</div>`;
   }
@@ -1075,32 +1076,55 @@ function selectRaceDist(key) {
 // TIME INPUTS — simple HRS + MIN boxes
 // ─────────────────────────────────────────────
 function buildTimeInputHTML(mode) {
-  // Parse any existing saved duration
-  let h=0, m=0, s=0;
+  let h='', m='', s='';
   const parts=(S.form.duration||'').split(':').map(Number);
-  if(parts.length===3){h=parts[0]||0;m=parts[1]||0;s=parts[2]||0;}
-  else if(parts.length===2){h=parts[0]||0;m=parts[1]||0;}
+  if(parts.length===3){h=parts[0]||'';m=parts[1]||'';s=parts[2]||'';}
+  else if(parts.length===2){h=parts[0]||'';m=parts[1]||'';}
   const showSec=(mode==='race');
   let html=`<div class="time-inputs">
     <div class="time-input-col">
-      <label>Hours</label>
-      <input type="number" id="ti-h" min="0" max="99" placeholder="0" value="${h||''}" oninput="syncTimeInputs()">
+      <input type="number" id="ti-h" min="0" max="99" placeholder="H" value="${h}" oninput="syncTimeInputs()">
     </div>
     <div class="time-input-sep">:</div>
     <div class="time-input-col">
-      <label>Minutes</label>
-      <input type="number" id="ti-m" min="0" max="59" placeholder="00" value="${m||''}" oninput="syncTimeInputs()">
+      <input type="number" id="ti-m" min="0" max="59" placeholder="MM" value="${m}" oninput="syncTimeInputs()">
     </div>`;
-  if(showSec) {
+  if(showSec){
     html+=`<div class="time-input-sep">:</div>
     <div class="time-input-col">
-      <label>Seconds</label>
-      <input type="number" id="ti-s" min="0" max="59" placeholder="00" value="${s||''}" oninput="syncTimeInputs()">
+      <input type="number" id="ti-s" min="0" max="59" placeholder="SS" value="${s}" oninput="syncTimeInputs()">
     </div>`;
   }
   html+=`</div>`;
   return html;
 }
+// Build editable pace field HTML
+function buildPaceFieldHTML(unitLabel) {
+  const paceStr=S.form.pace||'';
+  return `<div class="form-group">
+    <label>Pace</label>
+    <div class="pace-input-wrap">
+      <input type="text" id="f-pace" placeholder="0:00" value="${paceStr}" oninput="S.form.pace=this.value;calcFaultTolerant('pace')" style="padding-right:52px;font-family:'DM Mono',monospace;font-size:15px">
+      <span class="pace-unit-badge">${unitLabel}</span>
+    </div>
+  </div>`;
+}
+// Parse "M:SS" or "MM:SS" pace string → decimal minutes per unit
+function parsePace(str) {
+  if(!str) return 0;
+  const parts=str.split(':').map(Number);
+  if(parts.length===2&&!isNaN(parts[0])&&!isNaN(parts[1])){
+    return parts[0]+parts[1]/60;
+  }
+  return 0;
+}
+// Format decimal minutes → "M:SS"
+function fmtPace(mins) {
+  const m=Math.floor(mins);
+  const s=Math.round((mins-m)*60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+// Sync duration inputs → S.form.duration, then run fault tolerant calc
 function syncTimeInputs() {
   const h=parseInt(document.getElementById('ti-h')?.value)||0;
   const m=parseInt(document.getElementById('ti-m')?.value)||0;
@@ -1111,32 +1135,52 @@ function syncTimeInputs() {
   } else {
     S.form.duration=`${h}:${String(m).padStart(2,'0')}`;
   }
-  calcPace();
+  calcFaultTolerant('dur');
 }
 function setDistUnit(unit) {
   S.form.distUnit=unit;
   renderFormForType(S.form.type, S.form.date);
 }
-function calcPace() {
+// Fault-tolerant 3-way calculator: given any 2 of {dist, dur, pace}, compute the 3rd
+// changed = which field was just edited ('dist'|'dur'|'pace')
+function calcFaultTolerant(changed) {
   const distEl=document.getElementById('f-dist');
-  const durEl=document.getElementById('f-dur');
-  const valEl=document.getElementById('f-pace-val');
-  if(!valEl) return;
-  // Use DOM value if available, else fall back to S.form.distance (preset race distances)
-  const dist=parseFloat(distEl?.value)||parseFloat(S.form.distance)||0;
-  const mins=durationToMins(durEl?.value||S.form.duration||'');
-  if(dist>0&&mins>0){
-    const paceMin=mins/dist;
-    const pm=Math.floor(paceMin);
-    const ps=Math.round((paceMin-pm)*60);
-    const unit=S.form.distUnit==='km'?'km':'mi';
-    valEl.textContent=`${pm}:${String(ps).padStart(2,'0')} /${unit}`;
-    document.getElementById('f-pace-display')?.classList.add('has-pace');
-  } else {
-    valEl.textContent='—';
-    document.getElementById('f-pace-display')?.classList.remove('has-pace');
+  const paceEl=document.getElementById('f-pace');
+  // Read current values
+  let dist=parseFloat(distEl?.value)||parseFloat(S.form.distance)||0;
+  let durMins=durationToMins(S.form.duration||'');
+  let paceMins=parsePace(paceEl?.value||S.form.pace||'');
+  const have={dist:dist>0, dur:durMins>0, pace:paceMins>0};
+  // Compute the missing field from the other two
+  if(changed!=='pace'&&have.dist&&have.dur){
+    // dist + dur → pace
+    paceMins=durMins/dist;
+    const ps=fmtPace(paceMins);
+    if(paceEl) paceEl.value=ps;
+    S.form.pace=ps;
+  } else if(changed!=='dur'&&have.dist&&have.pace){
+    // dist + pace → dur
+    const totalMins=dist*paceMins;
+    const dh=Math.floor(totalMins/60);
+    const dm=Math.floor(totalMins%60);
+    const ds=Math.round((totalMins-Math.floor(totalMins))*60);
+    const showSec=(S.form.type==='race');
+    const durStr=showSec?`${dh}:${String(dm).padStart(2,'0')}:${String(ds).padStart(2,'0')}`:`${dh}:${String(dm).padStart(2,'0')}`;
+    S.form.duration=durStr;
+    // Update duration inputs
+    const tiH=document.getElementById('ti-h');const tiM=document.getElementById('ti-m');const tiS=document.getElementById('ti-s');
+    if(tiH) tiH.value=dh||'';
+    if(tiM) tiM.value=dm||'';
+    if(tiS&&showSec) tiS.value=ds||'';
+  } else if(changed!=='dist'&&have.dur&&have.pace){
+    // dur + pace → dist
+    const d=durMins/paceMins;
+    if(distEl){distEl.value=d.toFixed(2);}
+    S.form.distance=d.toFixed(2);
   }
 }
+// Legacy alias
+function calcPace(){calcFaultTolerant('dur');}
 function saveActivity() {
   const ds=document.getElementById('f-date')?document.getElementById('f-date').value:S.form.date;
   if(!ds) return;
