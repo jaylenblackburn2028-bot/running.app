@@ -95,20 +95,23 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 #panel-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:90;transition:background 0.3s var(--ease)}
 #panel-backdrop.visible{background:rgba(0,0,0,0.18);pointer-events:all}
 
-/* Side Panel — bottom sheet on mobile, right drawer on desktop */
+/* Side Panel — centered modal on all screen sizes */
 #side-panel{
   position:fixed;
-  left:0;right:0;bottom:var(--nav-h);
-  height:88vh;
+  top:50%;left:50%;
+  width:min(92vw,480px);
+  max-height:88vh;
   background:var(--surface);
-  border-radius:20px 20px 0 0;
+  border-radius:24px;
   z-index:95;
   display:flex;flex-direction:column;overflow:hidden;
-  transform:translateY(102%);
-  transition:transform 0.38s cubic-bezier(0.22,1,0.36,1);
-  box-shadow:0 -8px 48px rgba(0,0,0,0.13);
+  transform:translate(-50%,-50%) scale(0.93);
+  opacity:0;
+  pointer-events:none;
+  transition:transform 0.32s cubic-bezier(0.22,1,0.36,1),opacity 0.22s var(--ease);
+  box-shadow:0 24px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1);
 }
-#side-panel.open{transform:translateY(0)}
+#side-panel.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
 .panel-drag-handle{width:32px;height:3px;border-radius:2px;background:var(--line-2);margin:12px auto 0;flex-shrink:0}
 .panel-header{padding:16px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--line)}
 .panel-date-label{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;line-height:1.1;letter-spacing:-0.02em}
@@ -300,20 +303,14 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .form-sheet-sub{font-size:10px;color:var(--text-3);margin-top:2px;font-family:'DM Mono',monospace;letter-spacing:0.05em;text-transform:uppercase}
 .form-sheet-body{flex:1;overflow-y:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px}
 .form-sheet-body::-webkit-scrollbar{width:0}
-/* Time drum picker */
-.time-picker{display:flex;align-items:center;justify-content:center;gap:6px;padding:4px 0 8px;background:var(--surface-2);border-radius:16px;border:1.5px solid var(--line)}
-.time-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
-.time-sep{font-family:'DM Mono',monospace;font-size:26px;font-weight:300;color:var(--text-3);padding-bottom:18px;user-select:none;flex-shrink:0}
-.time-col-lbl{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3)}
-.drum-wrap{position:relative;width:100%;height:168px;overflow:hidden}
-.drum-fade-top,.drum-fade-bot{position:absolute;left:0;right:0;height:64px;z-index:3;pointer-events:none}
-.drum-fade-top{top:0;background:linear-gradient(to bottom,var(--surface-2) 20%,transparent 100%)}
-.drum-fade-bot{bottom:0;background:linear-gradient(to top,var(--surface-2) 20%,transparent 100%)}
-.drum-sel{position:absolute;top:50%;left:0;right:0;height:56px;transform:translateY(-50%);background:transparent;border-top:2px solid var(--accent);border-bottom:2px solid var(--accent);pointer-events:none;z-index:4;border-radius:0}
-.time-drum{height:168px;overflow-y:scroll;scroll-snap-type:y mandatory;-ms-overflow-style:none;scrollbar-width:none;position:relative;z-index:1}
-.time-drum::-webkit-scrollbar{display:none}
-.drum-item{height:56px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-family:'DM Mono',monospace;font-size:28px;font-weight:600;color:var(--text);user-select:none;letter-spacing:-0.02em}
-.drum-ghost{height:56px;scroll-snap-align:none}
+/* Time input — simple HRS + MIN boxes */
+.time-inputs{display:flex;align-items:flex-end;gap:10px}
+.time-input-col{display:flex;flex-direction:column;gap:6px;flex:1}
+.time-input-col label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3)}
+.time-input-col input[type=number]{font-family:'DM Mono',monospace;font-size:32px;font-weight:600;letter-spacing:-0.02em;color:var(--text);background:var(--surface-2);border:1.5px solid var(--line-2);border-radius:14px;padding:14px 12px;text-align:center;width:100%;appearance:textfield;-moz-appearance:textfield}
+.time-input-col input[type=number]::-webkit-inner-spin-button,.time-input-col input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+.time-input-col input[type=number]:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.time-input-sep{font-family:'DM Mono',monospace;font-size:32px;font-weight:300;color:var(--text-3);padding-bottom:18px;flex-shrink:0;user-select:none}
 /* Race distance picker */
 .race-dist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .race-dist-btn{padding:12px 8px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all 0.15s}
@@ -331,18 +328,21 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 #type-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:200;transition:background 0.3s var(--ease)}
 #type-picker-backdrop.visible{background:rgba(0,0,0,0.45);pointer-events:all}
 #type-picker{
-  position:fixed;left:0;right:0;bottom:var(--nav-h);
-  height:auto;max-height:88vh;
+  position:fixed;top:50%;left:50%;
+  width:min(92vw,520px);
+  max-height:88vh;
   background:var(--surface);
-  border-radius:24px 24px 0 0;
+  border-radius:24px;
   z-index:201;
   display:flex;flex-direction:column;
-  transform:translateY(110%);
-  transition:transform 0.4s cubic-bezier(0.22,1,0.36,1);
-  box-shadow:0 -12px 60px rgba(0,0,0,0.18);
+  transform:translate(-50%,-50%) scale(0.93);
+  opacity:0;
+  pointer-events:none;
+  transition:transform 0.32s cubic-bezier(0.22,1,0.36,1),opacity 0.22s var(--ease);
+  box-shadow:0 24px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1);
   overflow:hidden;
 }
-#type-picker.open{transform:translateY(0)}
+#type-picker.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
 .type-picker-handle{width:36px;height:4px;border-radius:2px;background:var(--line-2);margin:14px auto 0;flex-shrink:0}
 .type-picker-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .type-picker-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.02em}
@@ -357,8 +357,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .type-card-shine{position:absolute;top:-30%;right:-20%;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.08)}
 
 @media(min-width:768px){
-  #type-picker{left:auto;right:0;top:0;bottom:0;width:440px;height:auto;border-radius:0;border-left:1px solid var(--line);transform:translateX(110%);box-shadow:-8px 0 48px rgba(0,0,0,0.12)}
-  #type-picker.open{transform:translateX(0)}
+  #type-picker{width:min(80vw,560px)}
   .type-picker-handle{display:none}
   .type-picker-grid{grid-template-columns:repeat(2,1fr);padding:8px 20px 32px}
 }
@@ -443,8 +442,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
   .nav-btn{flex-direction:column;gap:4px;border-radius:var(--r2);padding:10px}
   #app{flex-direction:row;padding-bottom:0;padding-left:72px}
   #view-calendar{padding:20px 24px 12px;overflow:hidden}
-  #side-panel{left:auto;top:0;right:0;bottom:0;width:400px;height:auto;border-radius:0;border-left:1px solid var(--line);transform:translateX(100%);box-shadow:-4px 0 32px rgba(0,0,0,0.06)}
-  #side-panel.open{transform:translateX(0)}
+  #side-panel{width:min(80vw,520px)}
   .panel-drag-handle{display:none}
   #view-dashboard{padding:28px}
   #view-settings{padding:28px}
@@ -1075,14 +1073,14 @@ function renderFormForType(type, ds) {
     if(S.form.raceDistKey==='custom') {
       html+=`<div class="form-group"><label>Custom Distance</label><div style="display:flex;gap:8px"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
     }
-    html+=`<div class="form-group"><label>Finish Time</label><div id="time-picker-wrap" class="time-picker"></div></div>`;
+    html+=`<div class="form-group"><label>Finish Time</label>${buildTimeInputHTML('race')}</div>`;
     html+=`<div class="pace-display" id="f-pace-display"><span class="pace-display-lbl">Avg Pace</span><span class="pace-display-val" id="f-pace-val">—</span></div>`;
   } else if(['easy','long','cross'].includes(type)) {
     html+=`<div class="form-group"><label>Distance</label><div style="display:flex;gap:8px"><input type="number" id="f-dist" placeholder="0.0" step="0.01" value="${S.form.distance}" oninput="S.form.distance=this.value;calcPace()" style="flex:1"><div class="unit-toggle"><div class="unit-opt${S.form.distUnit==='miles'?' active':''}" onclick="setDistUnit('miles')">mi</div><div class="unit-opt${S.form.distUnit==='km'?' active':''}" onclick="setDistUnit('km')">km</div></div></div></div>`;
-    html+=`<div class="form-group"><label>Duration</label><div id="time-picker-wrap" class="time-picker"></div></div>`;
+    html+=`<div class="form-group"><label>Duration</label>${buildTimeInputHTML('simple')}</div>`;
     html+=`<div class="pace-display" id="f-pace-display"><span class="pace-display-lbl">Pace</span><span class="pace-display-val" id="f-pace-val">—</span></div>`;
   } else if(type==='strength') {
-    html+=`<div class="form-group"><label>Duration</label><div id="time-picker-wrap" class="time-picker"></div></div>`;
+    html+=`<div class="form-group"><label>Duration</label>${buildTimeInputHTML('simple')}</div>`;
   }
 
   html+=`<div class="form-group"><label>Notes</label><textarea id="f-notes" placeholder="Notes..." oninput="S.form.notes=this.value">${S.form.notes}</textarea></div>`;
@@ -1090,10 +1088,8 @@ function renderFormForType(type, ds) {
 
   const target=document.getElementById('form-sheet-body')||document.getElementById('panel-body');
   target.innerHTML=html;
-  // Init time picker drums after DOM update
-  if(['easy','long','cross','strength','race'].includes(type)) {
-    initTimePicker(type);
-  }
+  // Restore pace calculation after DOM update
+  setTimeout(()=>calcPace(), 0);
 }
 function selectRaceDist(key) {
   const d=RACE_DISTANCES.find(r=>r.key===key);
@@ -1113,85 +1109,41 @@ function selectRaceDist(key) {
   if(rn) rn.value=S.form.raceName;
 }
 // ─────────────────────────────────────────────
-// TIME DRUM PICKER
+// TIME INPUTS — simple HRS + MIN boxes
 // ─────────────────────────────────────────────
-function buildDrumHTML(id, count) {
-  let items='<div class="drum-ghost"></div>';
-  for(let i=0;i<count;i++) items+=`<div class="drum-item">${String(i).padStart(2,'0')}</div>`;
-  items+='<div class="drum-ghost"></div>';
-  return `<div class="time-col">
-    <div class="drum-wrap">
-      <div class="drum-sel"></div>
-      <div class="drum-fade-top"></div>
-      <div class="drum-fade-bot"></div>
-      <div class="time-drum" id="${id}">${items}</div>
-    </div>
-    <div class="time-col-lbl">${id==='drum-h'?'HRS':id==='drum-m'?'MIN':'SEC'}</div>
-  </div>`;
-}
-function initTimePicker(type) {
-  const wrap=document.getElementById('time-picker-wrap');
-  if(!wrap) return;
-  const showSec=(type==='race');
-  const maxH=type==='race'?31:24;
-  // Parse existing duration
-  let h=0,m=0,s=0;
+function buildTimeInputHTML(mode) {
+  // Parse any existing saved duration
+  let h=0, m=0, s=0;
   const parts=(S.form.duration||'').split(':').map(Number);
-  if(parts.length===3){h=parts[0];m=parts[1];s=parts[2];}
-  else if(parts.length===2){h=parts[0];m=parts[1];}
-  // Build drums into the wrapper
-  let inner=buildDrumHTML('drum-h',maxH);
-  inner+=`<div class="time-sep">:</div>`;
-  inner+=buildDrumHTML('drum-m',60);
-  if(showSec){inner+=`<div class="time-sep">:</div>`;inner+=buildDrumHTML('drum-s',60);}
-  wrap.innerHTML=inner;
-  // Wire up scroll listeners immediately (without setting scrollTop yet)
-  setupDrumListeners('drum-h',maxH);
-  setupDrumListeners('drum-m',60);
-  if(showSec) setupDrumListeners('drum-s',60);
-  // Defer scroll position to after the open animation so browser doesn't reset it
-  setTimeout(()=>{
-    setDrumVal('drum-h',h,maxH);
-    setDrumVal('drum-m',m,60);
-    if(showSec) setDrumVal('drum-s',s,60);
-    syncDuration();
-  }, 50);
+  if(parts.length===3){h=parts[0]||0;m=parts[1]||0;s=parts[2]||0;}
+  else if(parts.length===2){h=parts[0]||0;m=parts[1]||0;}
+  const showSec=(mode==='race');
+  let html=`<div class="time-inputs">
+    <div class="time-input-col">
+      <label>Hours</label>
+      <input type="number" id="ti-h" min="0" max="99" placeholder="0" value="${h||''}" oninput="syncTimeInputs()">
+    </div>
+    <div class="time-input-sep">:</div>
+    <div class="time-input-col">
+      <label>Minutes</label>
+      <input type="number" id="ti-m" min="0" max="59" placeholder="00" value="${m||''}" oninput="syncTimeInputs()">
+    </div>`;
+  if(showSec) {
+    html+=`<div class="time-input-sep">:</div>
+    <div class="time-input-col">
+      <label>Seconds</label>
+      <input type="number" id="ti-s" min="0" max="59" placeholder="00" value="${s||''}" oninput="syncTimeInputs()">
+    </div>`;
+  }
+  html+=`</div>`;
+  return html;
 }
-function setDrumVal(id,val,max) {
-  const el=document.getElementById(id);
-  if(!el) return;
-  const clamped=Math.max(0,Math.min(max-1,val));
-  el.scrollTop=clamped*56;
-}
-function setupDrumListeners(id,max) {
-  const el=document.getElementById(id);
-  if(!el) return;
-  let scrollTimer=null;
-  el.addEventListener('scroll',()=>{
-    clearTimeout(scrollTimer);
-    syncDuration();
-    // Snap after scroll settles
-    scrollTimer=setTimeout(()=>{
-      const snapped=Math.round(el.scrollTop/56)*56;
-      if(Math.abs(el.scrollTop-snapped)>1) el.scrollTo({top:snapped,behavior:'smooth'});
-    },150);
-  },{passive:true});
-}
-// Legacy alias kept for any direct calls
-function setupDrum(id,initial,max){setDrumVal(id,initial,max);setupDrumListeners(id,max);}
-function getDrumVal(id,max) {
-  const el=document.getElementById(id);
-  if(!el) return 0;
-  return Math.max(0,Math.min(max-1,Math.round(el.scrollTop/56)));
-}
-function syncDuration() {
-  const type=S.form.type;
-  const showSec=type==='race';
-  const maxH=type==='race'?31:24;
-  const h=getDrumVal('drum-h',maxH);
-  const m=getDrumVal('drum-m',60);
+function syncTimeInputs() {
+  const h=parseInt(document.getElementById('ti-h')?.value)||0;
+  const m=parseInt(document.getElementById('ti-m')?.value)||0;
+  const s=parseInt(document.getElementById('ti-s')?.value)||0;
+  const showSec=(S.form.type==='race');
   if(showSec){
-    const s=getDrumVal('drum-s',60);
     S.form.duration=`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   } else {
     S.form.duration=`${h}:${String(m).padStart(2,'0')}`;
@@ -1236,7 +1188,7 @@ function saveActivity() {
     type: S.form.type,
     distance: dist,
     distUnit: S.form.distUnit,
-    duration: S.form.duration||(document.getElementById('f-dur')?document.getElementById('f-dur').value:''),
+    duration: (()=>{syncTimeInputs();return S.form.duration||'';})(),
     raceName: document.getElementById('f-race-name')?document.getElementById('f-race-name').value:S.form.raceName,
     raceDistKey: S.form.raceDistKey||'',
     notes: document.getElementById('f-notes')?document.getElementById('f-notes').value:S.form.notes,
