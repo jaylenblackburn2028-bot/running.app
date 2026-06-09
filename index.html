@@ -95,15 +95,14 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 #panel-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:90;transition:background 0.3s var(--ease)}
 #panel-backdrop.visible{background:rgba(0,0,0,0.18);pointer-events:all}
 
-/* Side Panel — centered modal on all screen sizes */
-#side-panel{
+/* ── Shared modal shell ─────────────────────────────── */
+.modal-shell{
   position:fixed;
   top:50%;left:50%;
-  width:min(92vw,480px);
+  width:min(92vw,520px);
   max-height:88vh;
   background:var(--surface);
   border-radius:24px;
-  z-index:95;
   display:flex;flex-direction:column;overflow:hidden;
   transform:translate(-50%,-50%) scale(0.93);
   opacity:0;
@@ -111,14 +110,30 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
   transition:transform 0.32s cubic-bezier(0.22,1,0.36,1),opacity 0.22s var(--ease);
   box-shadow:0 24px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1);
 }
-#side-panel.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
-.panel-drag-handle{width:32px;height:3px;border-radius:2px;background:var(--line-2);margin:12px auto 0;flex-shrink:0}
-.panel-header{padding:16px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--line)}
-.panel-date-label{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;line-height:1.1;letter-spacing:-0.02em}
-.panel-sub{font-size:11px;color:var(--text-3);margin-top:4px;font-family:'DM Mono',monospace;letter-spacing:0.04em;text-transform:uppercase}
-.panel-close{width:28px;height:28px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:background 0.15s,color 0.15s;flex-shrink:0}
+.modal-shell.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
+/* Shared modal header */
+.modal-hd{padding:18px 20px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid var(--line)}
+.modal-hd-back{width:32px;height:32px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);flex-shrink:0;transition:background 0.15s,color 0.15s}
+.modal-hd-back:hover{background:var(--surface-hover);color:var(--text)}
+.modal-hd-mid{flex:1;min-width:0}
+.modal-hd-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;line-height:1.1}
+.modal-hd-sub{font-size:10px;color:var(--text-3);margin-top:3px;font-family:'DM Mono',monospace;letter-spacing:0.06em;text-transform:uppercase}
+.modal-hd-close{width:32px;height:32px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);flex-shrink:0;transition:background 0.15s,color 0.15s}
+.modal-hd-close:hover{background:var(--surface-hover);color:var(--text)}
+/* Shared modal body */
+.modal-bd{flex:1;overflow-y:auto;padding:18px 20px 24px;display:flex;flex-direction:column;gap:14px}
+.modal-bd::-webkit-scrollbar{width:0}
+
+/* Side Panel */
+#side-panel{z-index:95}
+.panel-drag-handle{display:none}
+/* legacy aliases so existing JS/HTML still works */
+.panel-header{padding:18px 20px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid var(--line)}
+.panel-date-label{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;line-height:1.1;letter-spacing:-0.02em}
+.panel-sub{font-size:10px;color:var(--text-3);margin-top:3px;font-family:'DM Mono',monospace;letter-spacing:0.06em;text-transform:uppercase}
+.panel-close{width:32px;height:32px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:background 0.15s,color 0.15s;flex-shrink:0}
 .panel-close:hover{background:var(--surface-hover);color:var(--text)}
-.panel-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.panel-body{flex:1;overflow-y:auto;padding:18px 20px 24px;display:flex;flex-direction:column;gap:14px}
 .panel-body::-webkit-scrollbar{width:0}
 
 /* Activity Cards — redesigned as data blocks */
@@ -273,36 +288,11 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .saved-workout-name{font-size:14px;font-weight:500;flex:1}
 .saved-workout-meta{font-size:12px;color:var(--text-2)}
 
-/* Modal */
-/* Activity Form Sheet */
+/* Backdrops */
 #form-sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:210;transition:background 0.3s var(--ease)}
 #form-sheet-backdrop.visible{background:rgba(0,0,0,0.45);pointer-events:all}
-#form-sheet{
-  position:fixed;
-  top:50%;left:50%;
-  width:min(92vw,540px);
-  max-height:88vh;
-  background:var(--surface);
-  border-radius:24px;
-  z-index:211;
-  display:flex;flex-direction:column;
-  transform:translate(-50%,-50%) scale(0.93);
-  opacity:0;
-  pointer-events:none;
-  transition:transform 0.32s cubic-bezier(0.22,1,0.36,1),opacity 0.22s var(--ease);
-  box-shadow:0 24px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1);
-  overflow:hidden;
-}
-#form-sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
-.form-sheet-handle{display:none}
-.form-sheet-header{padding:16px 18px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid var(--line)}
-.form-sheet-back{width:32px;height:32px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);flex-shrink:0;transition:background 0.15s,color 0.15s}
-.form-sheet-back:hover{background:var(--surface-hover);color:var(--text)}
-.form-sheet-header-mid{flex:1;min-width:0}
-.form-sheet-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em}
-.form-sheet-sub{font-size:10px;color:var(--text-3);margin-top:2px;font-family:'DM Mono',monospace;letter-spacing:0.05em;text-transform:uppercase}
-.form-sheet-body{flex:1;overflow-y:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px}
-.form-sheet-body::-webkit-scrollbar{width:0}
+/* z-index only — layout comes from .modal-shell */
+#form-sheet{z-index:211}
 /* Time input — simple HRS + MIN boxes */
 .time-inputs{display:flex;align-items:flex-end;gap:10px}
 .time-input-col{display:flex;flex-direction:column;gap:6px;flex:1}
@@ -320,32 +310,10 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .race-dist-mi{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-3);letter-spacing:0.03em}
 .race-dist-btn.active .race-dist-mi{color:var(--accent)}
 
-@media(min-width:768px){
-  #form-sheet{width:min(80vw,560px)}
-}
-
 /* Activity Type Picker */
 #type-picker-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:200;transition:background 0.3s var(--ease)}
 #type-picker-backdrop.visible{background:rgba(0,0,0,0.45);pointer-events:all}
-#type-picker{
-  position:fixed;top:50%;left:50%;
-  width:min(92vw,520px);
-  max-height:88vh;
-  background:var(--surface);
-  border-radius:24px;
-  z-index:201;
-  display:flex;flex-direction:column;
-  transform:translate(-50%,-50%) scale(0.93);
-  opacity:0;
-  pointer-events:none;
-  transition:transform 0.32s cubic-bezier(0.22,1,0.36,1),opacity 0.22s var(--ease);
-  box-shadow:0 24px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1);
-  overflow:hidden;
-}
-#type-picker.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all}
-.type-picker-handle{width:36px;height:4px;border-radius:2px;background:var(--line-2);margin:14px auto 0;flex-shrink:0}
-.type-picker-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.type-picker-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.02em}
+#type-picker{z-index:201}
 .type-picker-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:4px 16px 24px;overflow-y:auto}
 .type-card{border-radius:18px;padding:22px 18px 20px;display:flex;flex-direction:column;gap:10px;cursor:pointer;border:2px solid transparent;transition:transform 0.18s var(--ease),box-shadow 0.18s,opacity 0.15s;position:relative;overflow:hidden}
 .type-card:hover{transform:translateY(-2px);box-shadow:var(--sh3)}
@@ -356,11 +324,6 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .type-card-desc{font-size:11px;color:rgba(255,255,255,0.72);font-weight:500;letter-spacing:0.02em;line-height:1.4}
 .type-card-shine{position:absolute;top:-30%;right:-20%;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.08)}
 
-@media(min-width:768px){
-  #type-picker{width:min(80vw,560px)}
-  .type-picker-handle{display:none}
-  .type-picker-grid{grid-template-columns:repeat(2,1fr);padding:8px 20px 32px}
-}
 
 #modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);pointer-events:none;z-index:300;transition:background 0.25s}
 #modal-backdrop.visible{background:rgba(0,0,0,0.5);pointer-events:all}
@@ -442,7 +405,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
   .nav-btn{flex-direction:column;gap:4px;border-radius:var(--r2);padding:10px}
   #app{flex-direction:row;padding-bottom:0;padding-left:72px}
   #view-calendar{padding:20px 24px 12px;overflow:hidden}
-  #side-panel{width:min(80vw,520px)}
+  .modal-shell{width:min(80vw,560px)}
   .panel-drag-handle{display:none}
   #view-dashboard{padding:28px}
   #view-settings{padding:28px}
@@ -524,45 +487,45 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
   <!-- Panel backdrop -->
   <div id="panel-backdrop" onclick="closePanel()"></div>
   <!-- Side panel -->
-  <aside id="side-panel">
-    <div class="panel-drag-handle"></div>
-    <div class="panel-header">
-      <div>
-        <div class="panel-date-label" id="panel-date-label"></div>
-        <div class="panel-sub" id="panel-sub"></div>
+  <aside id="side-panel" class="modal-shell">
+    <div class="modal-hd">
+      <div class="modal-hd-mid">
+        <div class="modal-hd-title" id="panel-date-label"></div>
+        <div class="modal-hd-sub" id="panel-sub"></div>
       </div>
-      <button class="panel-close" onclick="closePanel()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      <button class="modal-hd-close" onclick="closePanel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="panel-body" id="panel-body"></div>
+    <div class="modal-bd" id="panel-body"></div>
   </aside>
 
   <!-- Activity Form Sheet -->
   <div id="form-sheet-backdrop" onclick="closeFormSheet()"></div>
-  <div id="form-sheet">
-    <div class="form-sheet-header">
-      <button class="form-sheet-back" id="form-sheet-back" style="display:none" onclick="closeFormSheet();openTypePicker(S.form.date)">
+  <div id="form-sheet" class="modal-shell">
+    <div class="modal-hd">
+      <button class="modal-hd-back" id="form-sheet-back" style="display:none" onclick="closeFormSheet();openTypePicker(S.form.date)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <div class="form-sheet-header-mid">
-        <div class="form-sheet-title" id="form-sheet-title"></div>
-        <div class="form-sheet-sub" id="form-sheet-sub"></div>
+      <div class="modal-hd-mid">
+        <div class="modal-hd-title" id="form-sheet-title"></div>
+        <div class="modal-hd-sub" id="form-sheet-sub"></div>
       </div>
-      <button class="panel-close" onclick="closeFormSheet()">
+      <button class="modal-hd-close" onclick="closeFormSheet()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="form-sheet-body" id="form-sheet-body"></div>
+    <div class="modal-bd" id="form-sheet-body"></div>
   </div>
 
   <!-- Activity Type Picker -->
   <div id="type-picker-backdrop" onclick="closeTypePicker()"></div>
-  <div id="type-picker">
-    <div class="type-picker-handle"></div>
-    <div class="type-picker-header">
-      <div class="type-picker-title">What did you do?</div>
-      <button class="panel-close" onclick="closeTypePicker()">
+  <div id="type-picker" class="modal-shell">
+    <div class="modal-hd">
+      <div class="modal-hd-mid">
+        <div class="modal-hd-title">What did you do?</div>
+      </div>
+      <button class="modal-hd-close" onclick="closeTypePicker()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
