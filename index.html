@@ -101,7 +101,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
   overflow:hidden;
   padding-bottom:var(--nav-h);
   opacity:0;
-  transition:opacity 0.28s var(--ease);
+  transition:opacity 0.3s cubic-bezier(0.22,1,0.36,1);
 }
 #day-overlay.open{opacity:1;pointer-events:all}
 @media(min-width:768px){
@@ -635,37 +635,35 @@ function selectDay(ds) {
   cell.style.transition='transform 0.15s ease';
   setTimeout(()=>{cell.style.transform='';cell.style.transition='';},150);
 
-  // Calculate zoom origin — center of the cell relative to the wrap element
+  // Calculate zoom origin — center of clicked cell relative to wrap
   const wrapRect=wrap.getBoundingClientRect();
   const cellRect=cell.getBoundingClientRect();
   const originX=cellRect.left+cellRect.width/2-wrapRect.left;
   const originY=cellRect.top+cellRect.height/2-wrapRect.top;
 
-  // Scale factor: make the cell fill the viewport
-  const vw=window.innerWidth;
-  const vh=window.innerHeight;
-  const scale=Math.max(vw/cellRect.width, vh/cellRect.height)*1.1;
+  // Moderate zoom — enough to clearly feel the dive without overshooting into blur
+  const scale=3.8;
 
-  // Hide overlay content while calendar zooms
+  // Prepare: hide overlay, clear content
   overlay.classList.remove('open');
   header.style.opacity='0';
   body.innerHTML='';
 
-  // ZOOM IN — the actual calendar rushes toward the clicked cell
+  // Set origin, then trigger zoom with ease-OUT (fast start → smooth stop)
   wrap.style.transition='none';
   wrap.style.transformOrigin=`${originX}px ${originY}px`;
   void wrap.offsetWidth;
-  wrap.style.transition='transform 0.52s cubic-bezier(0.4,0,1,1)';
+  wrap.style.transition='transform 0.55s cubic-bezier(0.22,1,0.36,1)';
   wrap.style.transform=`scale(${scale})`;
 
-  // After zoom lands, fade in the day overlay on top
-  setTimeout(()=>{
-    renderCalendar();
-    openDayPanel(ds);
-    header.style.transition='opacity 0.22s';
-    header.style.opacity='1';
-    overlay.classList.add('open');
-  },460);
+  // Load content immediately (hidden behind overlay)
+  setTimeout(()=>{ renderCalendar(); openDayPanel(ds); }, 40);
+
+  // Fade overlay in while zoom is still moving — no dead gap
+  setTimeout(()=>{ overlay.classList.add('open'); }, 260);
+
+  // Header fades in just after overlay
+  setTimeout(()=>{ header.style.transition='opacity 0.2s'; header.style.opacity='1'; }, 320);
 }
 
 // ─────────────────────────────────────────────
@@ -679,20 +677,21 @@ function closePanel() {
   const ds=S.selectedDate;
   S.selectedDate=null; S.panelMode=null;
 
-  // Fade out the overlay
-  overlay.classList.remove('open');
+  // Fade header out first
+  header.style.transition='opacity 0.12s';
+  header.style.opacity='0';
 
-  // After overlay is gone, ZOOM BACK OUT
+  // Overlay fades out and zoom-back START TOGETHER — no waiting
   setTimeout(()=>{
-    wrap.style.transition='transform 0.45s cubic-bezier(0,0,0.2,1)';
+    overlay.classList.remove('open');
+    wrap.style.transition='transform 0.48s cubic-bezier(0.22,1,0.36,1)';
     wrap.style.transform='scale(1)';
-    header.style.opacity='0';
     setTimeout(()=>{
       header.style.opacity='';
       header.style.transition='';
       renderCalendar();
-    },460);
-  },220);
+    },500);
+  },100);
 }
 function setPanelHeader(title, sub) {
   document.getElementById('panel-date-label').textContent=title;
