@@ -193,23 +193,25 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
 .block-del-btn:hover{color:#E53935}
 
 /* Dashboard */
-#view-dashboard{padding:20px 16px;gap:16px;overflow-y:auto}
+#view-dashboard{padding:20px 16px 32px;gap:12px;overflow-y:auto}
+#dash-content{display:flex;flex-direction:column;gap:12px}
 .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.dash-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
-.filter-tabs{display:flex;gap:2px;background:var(--surface-2);border-radius:var(--r);padding:3px}
-.filter-tab{padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.dash-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.filter-tabs{display:flex;gap:2px;background:var(--surface-2);border-radius:var(--r);padding:3px;border:1.5px solid var(--line)}
+.filter-tab{padding:5px 11px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:var(--text-2);cursor:pointer;transition:all 0.18s;white-space:nowrap}
 .filter-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--sh1)}
-.highlight-card{background:var(--surface);border-radius:var(--r3);padding:20px;box-shadow:var(--sh1);border:1.5px solid var(--line);position:relative;overflow:hidden}
-.highlight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--c-long))}
-.highlight-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:600;line-height:1.4;color:var(--text)}
-.chart-card{background:var(--surface);border-radius:var(--r3);padding:18px;box-shadow:var(--sh1);border:1.5px solid var(--line)}
-.chart-card-title{font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-2);margin-bottom:14px}
+.highlight-card{background:var(--surface);border-radius:var(--r3);padding:18px 20px;box-shadow:var(--sh1);border:1.5px solid var(--line);position:relative;overflow:hidden}
+.highlight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),#f5a623,var(--c-long))}
+.highlight-text{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;line-height:1.5;color:var(--text);letter-spacing:-0.01em}
+.chart-card{background:var(--surface);border-radius:var(--r3);padding:18px;border:1.5px solid var(--line)}
+.chart-card-title{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px}
 .chart-wrap{position:relative;height:180px}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.stat-card{background:var(--surface);border-radius:var(--r2);padding:16px;box-shadow:var(--sh1);border:1.5px solid var(--line)}
-.stat-card-val{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:var(--text);line-height:1;margin-bottom:4px}
-.stat-card-label{font-size:12px;color:var(--text-2)}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat-card{background:var(--surface);border-radius:var(--r2);padding:16px 14px;border:1.5px solid var(--line);display:flex;flex-direction:column;gap:5px}
+.stat-card-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--text);line-height:1;letter-spacing:-0.03em}
+.stat-card-label{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3)}
 .stat-card.wide{grid-column:span 2}
+.stat-card.wide .stat-card-val{font-size:28px}
 .empty-dash-overlay{position:absolute;inset:0;background:rgba(var(--surface-rgb,255,255,255),0.85);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;border-radius:var(--r3);z-index:2;padding:20px}
 [data-theme="dark"] .empty-dash-overlay{background:rgba(29,29,27,0.85)}
 .empty-dash-icon{font-size:28px;margin-bottom:4px}
@@ -337,13 +339,11 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.01em
   .day-cell{min-height:100px}
   .type-grid{grid-template-columns:repeat(3,1fr)}
   .workout-mode-grid{grid-template-columns:repeat(3,1fr)}
-  .stats-grid{grid-template-columns:repeat(3,1fr)}
-  .stat-card.wide{grid-column:span 3}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
   /* desktop overlay handled via padding-left:72px */
 }
 @media(min-width:1100px){
-  .stats-grid{grid-template-columns:repeat(5,1fr)}
-  .stat-card.wide{grid-column:span 5}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
 }
 </style>
 </head>
@@ -1307,27 +1307,30 @@ function renderDashboard() {
   const hasData=acts.length>0;
   const unit=S.settings.units;
   const content=document.getElementById('dash-content');
+  const highlight=generateHighlight(acts,totalMiles);
   content.innerHTML=`
-    <div class="chart-card" style="margin-bottom:12px" id="mileage-card">
+    <div class="highlight-card">
+      <div class="highlight-text">${highlight}</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-card-val">${totalMiles.toFixed(1)}</div><div class="stat-card-label">Total ${unit}</div></div>
+      <div class="stat-card"><div class="stat-card-val">${totalRuns}</div><div class="stat-card-label">Total Runs</div></div>
+      <div class="stat-card"><div class="stat-card-val">${fmtTime(totalMins)}</div><div class="stat-card-label">Total Time</div></div>
+      <div class="stat-card"><div class="stat-card-val">${avgDist.toFixed(1)}</div><div class="stat-card-label">Avg ${unit}/Run</div></div>
+    </div>
+    <div class="chart-card" id="mileage-card">
       <div class="chart-card-title">Weekly Mileage</div>
       <div class="chart-wrap" style="position:relative"><canvas id="chart-mileage"></canvas>${!hasData?emptyOverlay('📈','Log a few runs to see your weekly mileage trend.'):''}</div>
       <div class="legend" style="margin-top:8px"><div class="legend-item"><div class="legend-dot" style="background:#4CAF7D"></div>At goal</div><div class="legend-item"><div class="legend-dot" style="background:#D0CFCA"></div>Below goal</div></div>
     </div>
-    <div class="chart-card" style="margin-bottom:12px">
-      <div class="chart-card-title">Run Type Breakdown</div>
+    <div class="chart-card">
+      <div class="chart-card-title">Training Mix</div>
       <div class="chart-wrap" style="position:relative"><canvas id="chart-type"></canvas>${!hasData?emptyOverlay('🍩','Log activities to see your training mix.'):''}</div>
       <div class="legend" id="type-legend"></div>
     </div>
-    <div class="chart-card" style="margin-bottom:12px">
+    <div class="chart-card">
       <div class="chart-card-title">Longest Run Trend</div>
       <div class="chart-wrap" style="position:relative"><canvas id="chart-longest"></canvas>${!hasData?emptyOverlay('📊','Log at least 2 weeks of runs to see your longest run trend.'):''}</div>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-card-val mono">${totalMiles.toFixed(1)}</div><div class="stat-card-label">Total ${unit}</div></div>
-      <div class="stat-card"><div class="stat-card-val mono">${totalRuns}</div><div class="stat-card-label">Total Runs</div></div>
-      <div class="stat-card"><div class="stat-card-val mono">${fmtTime(totalMins)}</div><div class="stat-card-label">Total Time</div></div>
-      <div class="stat-card"><div class="stat-card-val mono">${avgDist.toFixed(1)}</div><div class="stat-card-label">Avg Distance</div></div>
-      <div class="stat-card wide"><div class="stat-card-val mono">${longestEver.toFixed(1)}</div><div class="stat-card-label">Longest Run Ever (${unit})</div></div>
     </div>
   `;
   setTimeout(()=>initCharts(acts, startStr, endStr), 50);
