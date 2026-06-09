@@ -649,21 +649,20 @@ function selectDay(ds) {
   header.style.opacity='0';
   body.innerHTML='';
 
-  // Set origin, then trigger zoom with ease-OUT (fast start → smooth stop)
+  // Kick off zoom — ease-out: fast start, smooth stop
   wrap.style.transition='none';
   wrap.style.transformOrigin=`${originX}px ${originY}px`;
   void wrap.offsetWidth;
-  wrap.style.transition='transform 0.55s cubic-bezier(0.22,1,0.36,1)';
+  wrap.style.transition='transform 0.5s cubic-bezier(0.22,1,0.36,1)';
   wrap.style.transform=`scale(${scale})`;
 
-  // Load content immediately (hidden behind overlay)
-  setTimeout(()=>{ renderCalendar(); openDayPanel(ds); }, 40);
-
-  // Fade overlay in while zoom is still moving — no dead gap
-  setTimeout(()=>{ overlay.classList.add('open'); }, 260);
-
-  // Header fades in just after overlay
-  setTimeout(()=>{ header.style.transition='opacity 0.2s'; header.style.opacity='1'; }, 320);
+  // At 280ms (mid-zoom): load content + fade overlay in together — zero dead gap
+  // NOTE: no renderCalendar() here — never touch the grid DOM during animation
+  setTimeout(()=>{
+    openDayPanel(ds);
+    overlay.classList.add('open');
+    setTimeout(()=>{ header.style.transition='opacity 0.22s'; header.style.opacity='1'; }, 80);
+  }, 280);
 }
 
 // ─────────────────────────────────────────────
@@ -677,21 +676,22 @@ function closePanel() {
   const ds=S.selectedDate;
   S.selectedDate=null; S.panelMode=null;
 
-  // Fade header out first
-  header.style.transition='opacity 0.12s';
+  // Fade overlay out
+  header.style.transition='opacity 0.1s';
   header.style.opacity='0';
+  overlay.classList.remove('open');
 
-  // Overlay fades out and zoom-back START TOGETHER — no waiting
+  // Zoom back — starts right as overlay begins fading
   setTimeout(()=>{
-    overlay.classList.remove('open');
-    wrap.style.transition='transform 0.48s cubic-bezier(0.22,1,0.36,1)';
+    wrap.style.transition='transform 0.45s cubic-bezier(0.22,1,0.36,1)';
     wrap.style.transform='scale(1)';
+    // Only re-render calendar AFTER zoom fully returns (no DOM thrash during animation)
     setTimeout(()=>{
       header.style.opacity='';
       header.style.transition='';
       renderCalendar();
-    },500);
-  },100);
+    },470);
+  },30);
 }
 function setPanelHeader(title, sub) {
   document.getElementById('panel-date-label').textContent=title;
